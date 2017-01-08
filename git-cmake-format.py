@@ -4,7 +4,7 @@
 import os
 import subprocess
 import sys
-
+import numpy as np
 
 Git='git'
 ClangFormat='clang-format'
@@ -48,11 +48,15 @@ def isFormattable(File):
             return True
     return False
 
+def findLatestClangVersion(ClangFormat):
+    for version in np.arange(3.8,10.0,0.1):
+        if os.path.isfile(ClangFormat + str(version)):
+          return ClangFormat + str(version)
+    return ClangFormat
 
 def formatFile(FileName, GitRoot):
     subprocess.Popen([ClangFormat, Style, '-i', os.path.join(GitRoot,FileName)])
     return
-
 
 def requiresFormat(FileName):
     GitShowRet = subprocess.Popen([Git, "show", ":" + FileName],
@@ -92,6 +96,7 @@ if __name__ == "__main__":
             Git = arg
         elif "clang-format" in arg:
             ClangFormat = arg
+            ClangFormat = findLatestClangVersion(ClangFormat)
         elif "-style=" in arg:
             Style = arg
         elif "-ignore=" in arg:
